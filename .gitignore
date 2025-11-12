@@ -1,0 +1,53 @@
+# Environment
+.env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+*.egg-info/
+
+# Node
+node_modules/
+npm-debug.log*
+dist/
+build/
+
+# Database
+chroma_db/
+*.db
+*.sqlite
+
+# Data
+backend/data/*.pdf
+backend/data/*.txt
+!backend/data/sample_document.txt
+
+# Models (except README)
+frontend/public/models/*.glb
+frontend/public/models/*.gltf
+!frontend/public/models/README.md
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Docker
+*.log
+
+
