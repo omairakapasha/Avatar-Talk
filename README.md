@@ -1,11 +1,11 @@
 # AI Avatar Chatbot
 
-A modular web application featuring a RAG-powered chatbot with OpenAI/Gemini integration and a real-time talking avatar with lip sync capabilities using React.js and a Blender GLB model.
+A modular web application featuring a RAG-powered chatbot with OpenAI/Gemini integration and a real-time talking avatar with lip sync capabilities using React.js and sprite-based animation.
 
 ## Features
 
 - **RAG Chatbot Module**: Document-based Q&A using OpenAI SDK and Gemini API
-- **Talking Avatar Module**: Real-time 3D avatar with lip sync using React Three Fiber
+- **Talking Avatar Module**: Real-time sprite-based avatar with lip sync animation
 - **Modular Architecture**: Easy to extend and maintain
 - **WebSocket Support**: Real-time streaming for chat and audio
 - **Open Source**: Built entirely with open-source technologies
@@ -41,14 +41,13 @@ ai-avatar-chatbot/
 - ChromaDB (vector storage)
 - OpenAI SDK
 - Google Generative AI (Gemini)
-- Coqui TTS (open-source TTS)
+- Resemble.ai (TTS)
 
 ### Frontend
 - React 18
-- React Three Fiber (3D rendering)
-- Three.js
+- Canvas-based sprite animation
 - Material-UI
-- Socket.io-client (WebSocket)
+- Native WebSocket API
 
 ## Quick Start
 
@@ -58,11 +57,10 @@ ai-avatar-chatbot/
 # Run setup script
 ./setup.sh
 
-# Add your Gemini API key to backend/.env
+# Add your API keys to backend/.env
 nano backend/.env
-
-# Place your GLB model (optional)
-cp your-model.glb frontend/public/models/avatar.glb
+# Add: GEMINI_API_KEY=your_key_here
+# Add: RESEMBLE_API_KEY=your_key_here
 
 # Start both services
 ./start-dev.sh
@@ -72,14 +70,15 @@ cp your-model.glb frontend/public/models/avatar.glb
 
 ```bash
 # Create .env in project root with your API keys
-echo "GEMINI_API_KEY=AIzaSyBd6KPjAzO_P5msJEWJ6LIZvrc0170f3Qc" > .env
+echo "GEMINI_API_KEY=your_gemini_key_here" > .env
+echo "RESEMBLE_API_KEY=your_resemble_key_here" >> .env
 
 # Start services
 docker-compose up
 ```
 
 Access at:
-- Frontend: http://localhost:3000
+- Frontend: http://localhost:5173 (dev) or http://localhost:80 (Docker)
 - Backend API: http://localhost:8000
 - API Docs: http://localhost:8000/docs
 
@@ -99,7 +98,9 @@ pip install -r requirements.txt
 
 # Configure environment
 cp .env.example .env
-# Edit .env and add your GEMINI_API_KEY
+# Edit .env and add your API keys:
+# GEMINI_API_KEY=your_key_here
+# RESEMBLE_API_KEY=your_key_here
 
 # Run server
 python run.py
@@ -113,17 +114,17 @@ cd frontend
 # Install dependencies
 npm install
 
-# Place your GLB model
-# Copy to: public/models/avatar.glb
-
 # Run dev server
 npm run dev
+# Frontend will be available at http://localhost:5173
+# Note: Avatar sprite frames are already included in public/models/
 ```
 
 ## Configuration
 
 ### Required
 - **GEMINI_API_KEY**: Google Gemini API key (primary LLM)
+- **RESEMBLE_API_KEY**: Resemble.ai API key (for TTS)
 
 ### Optional
 - **OPENAI_API_KEY**: OpenAI API key (alternative LLM)
@@ -131,8 +132,7 @@ npm run dev
 ### System Requirements
 - Python 3.11+
 - Node.js 18+
-- 4GB+ RAM (for TTS models)
-- No GPU required (CPU-optimized)
+- No GPU required (cloud-based TTS)
 
 ## Usage
 
@@ -193,9 +193,15 @@ curl -X POST "http://localhost:8000/api/avatar/speak" \
 2. Implement your module with `router.py`, business logic files, and `__init__.py`
 3. Import and include the router in `backend/app/main.py`
 
+### Avatar Implementation
+
+The avatar uses sprite-based animation with PNG frames. Two avatar options are included:
+- **Lateman**: Sprite frames in `frontend/public/models/Lateman/`
+- **Old Man**: Sprite frames in `frontend/public/models/oldman/`
+
 ### Lip Sync Implementation
 
-The avatar uses viseme-based lip sync. The backend generates 8 basic mouth shapes:
+The avatar uses viseme-based lip sync. The backend generates 8 basic mouth shapes that map to sprite frames:
 - 0: Silence
 - 1: Open (A, E sounds)
 - 2: Smile (I sounds)
@@ -205,24 +211,26 @@ The avatar uses viseme-based lip sync. The backend generates 8 basic mouth shape
 - 6: Teeth on lip (F, V)
 - 7: Teeth visible (Th, S, Z)
 
-For production use, integrate proper phoneme extraction tools like Rhubarb Lip Sync.
+The sprite frames are automatically selected based on the viseme index during speech.
 
 ## Troubleshooting
 
 ### TTS Not Working
-- Ensure you have sufficient disk space for model downloads
-- Check if CUDA is available for GPU acceleration
-- Try using the fallback TTS model
+- Verify RESEMBLE_API_KEY is set correctly in backend/.env
+- Ensure you have created a voice in your Resemble.ai account
+- Check backend logs for Resemble.ai API errors
+- Verify voice UUID and project UUID are configured correctly
 
 ### RAG Not Finding Documents
-- Verify OPENAI_API_KEY is set correctly
-- Check that documents are in supported formats (PDF, TXT)
+- Verify GEMINI_API_KEY or OPENAI_API_KEY is set correctly
+- Check that documents are in supported formats (PDF, TXT, DOCX)
 - Ensure ChromaDB directory has write permissions
 
 ### WebSocket Connection Issues
-- Check CORS settings in backend
+- Check CORS settings in backend configuration
 - Verify WebSocket URL in frontend configuration
 - Check firewall settings
+- Ensure backend is running on port 8000
 
 ## License
 
